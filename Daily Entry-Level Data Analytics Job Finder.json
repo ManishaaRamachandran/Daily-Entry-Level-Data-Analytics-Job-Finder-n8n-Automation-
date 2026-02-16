@@ -1,0 +1,151 @@
+{
+  "name": "Daily Entry-Level Data Analytics Job Finder",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 13 * * *"
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "38c69d70-b0cf-4f82-9aab-955c63da9175",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.adzuna.com/v1/api/jobs/in/search/1",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "app_id",
+              "value": "5a970a51"
+            },
+            {
+              "name": "app_key",
+              "value": "a1521a2940c0983bd17a0ba7af8e28fb"
+            },
+            {
+              "name": "results_per_page",
+              "value": "10"
+            },
+            {
+              "name": "what",
+              "value": "entry level data analyst"
+            },
+            {
+              "name": "where",
+              "value": "India"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "df7407f2-2ce6-4fcc-9350-ae0264f9b786",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = items[0].json.results;\n\nlet html = `\n<h2 style=\"font-family:Arial;\">📌 Daily Entry-Level Data Analytics Jobs (Adzuna)</h2>\n\n<table border=\"1\" cellpadding=\"8\" cellspacing=\"0\" \nstyle=\"border-collapse:collapse; width:100%; font-family:Arial; font-size:14px;\">\n  <tr style=\"background-color:#f2f2f2; text-align:left;\">\n    <th>#</th>\n    <th>Job Title</th>\n    <th>Company</th>\n    <th>Location</th>\n    <th>Salary</th>\n    <th>Apply Link</th>\n  </tr>\n`;\n\nresults.forEach((job, index) => {\n\n  let salary = \"Not mentioned\";\n\n  if (job.salary_min && job.salary_max) {\n    salary = `${job.salary_min} - ${job.salary_max}`;\n  } else if (job.salary_min) {\n    salary = `${job.salary_min}+`;\n  } else if (job.salary_max) {\n    salary = `Up to ${job.salary_max}`;\n  }\n\n  html += `\n  <tr>\n    <td>${index + 1}</td>\n    <td>${job.title}</td>\n    <td>${job.company.display_name}</td>\n    <td>${job.location.display_name}</td>\n    <td>${salary}</td>\n    <td><a href=\"${job.redirect_url}\" target=\"_blank\">Apply</a></td>\n  </tr>\n  `;\n});\n\nhtml += `\n</table>\n<br>\n<p style=\"font-family:Arial; font-size:12px;\"><i>Sent automatically via n8n</i></p>\n`;\n\nreturn [\n  {\n    json: {\n      emailBody: html\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "935b21b8-40c2-4cc4-bf3e-31b2740f3d6b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "manisharam1224@gmail.com",
+        "subject": "=Daily Entry Level Data Analyst Jobs - {{$now}}",
+        "message": "={{$json.emailBody}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        0
+      ],
+      "id": "a34ddffe-2195-4b81-95e4-6875cc957fc1",
+      "name": "Send a message",
+      "webhookId": "80e0a28c-8517-42b2-8005-ae376bb28ca4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "EPi8IlkChX0gHVt4",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "b430aada-566a-432b-9b3b-9ba92f2f41ce",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "62c6706f1e7f38ae4a82a4fe38feaba77faf9e9bb5cac349ba63694ffb8ebf30"
+  },
+  "id": "aMGEC7IlibF0cViV",
+  "tags": []
+}
